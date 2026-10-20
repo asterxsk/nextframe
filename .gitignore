@@ -14,3 +14,8 @@ data/raw/*.zip
 
 # the hairline figure's render artifacts, reproducible with look.mjs
 web/figures/hairline-*.png
+
+# deck: the render PNGs and the generated TTFs are reproducible with
+# deck/build_deck.py and deck/build_fonts.py; the pptx and pdf are the deliverable
+deck/render/
+deck/fonts/
