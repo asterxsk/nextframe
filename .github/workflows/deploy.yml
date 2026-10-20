@@ -42,18 +42,19 @@ jobs:
           # vite.config.ts already sets base: '/nextframe/'
           NODE_OPTIONS: --max-old-space-size=4096
 
-      - name: Drop the duplicate public fonts
-        # Vite hashes the fonts referenced from CSS into dist/assets and also
-        # copies public/ verbatim; the copies are dead weight.
+      - name: Check the fonts resolve
+        # index.css points at /fonts/*, which Vite leaves as-is (it only rewrites
+        # URLs it hashed). At base '/nextframe/' that is an absolute path off the
+        # site root, so assert the file the page asks for is the file published.
         working-directory: web
         run: |
           for f in dist/fonts/*.woff2; do
             name=$(basename "$f")
-            if ls dist/assets/"${name%.woff2}"-*.woff2 >/dev/null 2>&1; then
-              rm -f "$f"
-            fi
+            grep -q "/nextframe/fonts/$name" dist/assets/*.css \
+              || { echo "::error::$name is not referenced by the built CSS at the right path"; exit 1; }
+            grep -q "/nextframe/fonts/$name" dist/index.html \
+              || { echo "::error::$name is not preloaded from the right path"; exit 1; }
           done
-          ls -la dist/fonts 2>/dev/null || true
 
       - uses: actions/configure-pages@v5
 
