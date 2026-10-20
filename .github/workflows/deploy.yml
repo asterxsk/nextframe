@@ -45,16 +45,13 @@ jobs:
       - name: Check the fonts resolve
         # index.css points at /fonts/*, which Vite leaves as-is (it only rewrites
         # URLs it hashed). At base '/nextframe/' that is an absolute path off the
-        # site root, so assert the file the page asks for is the file published.
-        # Only the CSS reference is required; the preload tags cover a subset.
+        # site root, so assert every font the CSS asks for is actually published.
         working-directory: web
         run: |
-          for f in dist/fonts/*.woff2; do
-            name=$(basename "$f")
-            grep -q "/nextframe/fonts/$name" dist/assets/*.css \
-              || { echo "::error::$name is published but the built CSS never asks for it"; exit 1; }
-            grep -q -- "/nextframe/fonts/$name" dist/index.html \
-              || echo "::notice::$name is not preloaded (fine, it is still in the CSS)"
+          grep -o '/nextframe/fonts/[a-z0-9.-]*\.woff2' dist/assets/*.css | sort -u | while read -r url; do
+            f="dist${url#/nextframe}"
+            test -f "$f" || { echo "::error::$url is referenced but $f was not built"; exit 1; }
+            echo "ok $url"
           done
 
       - uses: actions/configure-pages@v5
