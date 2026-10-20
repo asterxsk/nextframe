@@ -1,0 +1,72 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# one deploy at a time; a newer push supersedes a run still in flight
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install
+        working-directory: web
+        run: npm ci
+
+      - name: Typecheck
+        working-directory: web
+        run: npx tsc --noEmit
+
+      - name: Build
+        working-directory: web
+        run: npm run build
+        env:
+          # vite.config.ts already sets base: '/nextframe/'
+          NODE_OPTIONS: --max-old-space-size=4096
+
+      - name: Drop the duplicate public fonts
+        # Vite hashes the fonts referenced from CSS into dist/assets and also
+        # copies public/ verbatim; the copies are dead weight.
+        working-directory: web
+        run: |
+          for f in dist/fonts/*.woff2; do
+            name=$(basename "$f")
+            if ls dist/assets/"${name%.woff2}"-*.woff2 >/dev/null 2>&1; then
+              rm -f "$f"
+            fi
+          done
+          ls -la dist/fonts 2>/dev/null || true
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
