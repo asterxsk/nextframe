@@ -95,7 +95,7 @@ export default function GraphView({ data, uid }: { data: Bundle; uid: number }) 
       </header>
 
       <div className="mt-5 grid grid-cols-1 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_300px]">
-        <div className="relative h-[min(72dvh,760px)] min-h-[460px] overflow-hidden border border-line bg-canvas">
+        <div className="relative h-[min(72dvh,760px)] min-h-[360px] overflow-hidden border border-line bg-canvas sm:min-h-[460px]">
           <ForceCanvas
             bundle={data}
             colourMode={mode}
@@ -114,12 +114,15 @@ export default function GraphView({ data, uid }: { data: Bundle; uid: number }) 
             }}
           />
 
-          <div className="pointer-events-none absolute inset-x-3 top-3 flex items-start justify-between gap-3">
+          {/* the control cluster wraps at narrow widths so every button stays
+              inside the canvas instead of clipping off its right edge */}
+          <div className="pointer-events-none absolute inset-x-2 top-2 flex flex-wrap items-start justify-between gap-2 sm:inset-x-3 sm:top-3">
             <ModeSwitch mode={mode} setMode={setMode} />
-            <div className="pointer-events-auto flex items-center gap-1 border border-line bg-canvas/90 p-1 backdrop-blur">
+            <div className="pointer-events-auto ml-auto flex items-center gap-1 border border-line bg-canvas/90 p-1 backdrop-blur">
               <Button
                 variant="quiet"
                 size="icon"
+                className="h-8 w-8"
                 aria-label="Zoom in"
                 onClick={() => zoom(viewRef, 1.35)}
               >
@@ -128,6 +131,7 @@ export default function GraphView({ data, uid }: { data: Bundle; uid: number }) 
               <Button
                 variant="quiet"
                 size="icon"
+                className="h-8 w-8"
                 aria-label="Zoom out"
                 onClick={() => zoom(viewRef, 1 / 1.35)}
               >
@@ -136,6 +140,7 @@ export default function GraphView({ data, uid }: { data: Bundle; uid: number }) 
               <Button
                 variant="quiet"
                 size="icon"
+                className="h-8 w-8"
                 aria-label="Fit to view"
                 onClick={() => fitRef.current()}
               >
@@ -167,7 +172,7 @@ export default function GraphView({ data, uid }: { data: Bundle; uid: number }) 
           )}
         </div>
 
-        <aside className="grid gap-3">
+        <aside className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-1">
           <Panel title="Layout" right="precomputed">
             <label className="grid gap-2">
               <span className="flex justify-between font-mono text-[9.5px] text-faint">
@@ -354,7 +359,12 @@ function ModeSwitch({ mode, setMode }: { mode: Mode; setMode: (m: Mode) => void 
         aria-label="Colour mode"
       >
         {opts.map(([id, label]) => (
-          <ToggleGroupItem key={id} value={id} aria-label={`Colour by ${label.toLowerCase()}`}>
+          <ToggleGroupItem
+            key={id}
+            value={id}
+            aria-label={`Colour by ${label.toLowerCase()}`}
+            className="h-8 px-2 sm:h-6"
+          >
             {label}
           </ToggleGroupItem>
         ))}

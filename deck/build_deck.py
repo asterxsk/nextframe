@@ -1044,18 +1044,39 @@ facts(sl, ML, 3.30, 5.05, [
 # the list, coloured
 lx, ly = 6.55, 1.94
 caption(sl, lx, ly - 0.26, "Viewer 498's top ten, in order, by colour", w=5.6)
+
+# The rows are laid out from measured widths, not a fixed pitch. A title wider
+# than its column wraps, and a wrapped row is taller by one line: the rule then
+# follows that row's own last line instead of cutting through it. Line pitch is
+# the deck's 1.25 spacing on a 10 pt line (1.25 x 1.2 x 10 pt = 0.208 in). A
+# one-line row is 0.392 in, which keeps ten rows — one of them wrapped — clear
+# of the closing note at 6.20.
+TX0, TXW = lx + 0.30, 3.10
+GX0, GXW = lx + 3.42, 1.70
+NX0 = lx + 5.16
+TSZ, GSZ, NSZ = 10.0, 8.0, 9.0
+LINE_H = 1.25 * 1.2 * TSZ / 72.0
+ROW_H, RULE = 0.392, 0.32
+yy = ly
 for i, r in enumerate(REC498):
     mid = r["m"]
-    yy = ly + i * 0.415
     col = LC498["col"][i]
-    rect(sl, lx, yy + 0.03, 0.15, 0.15, fill=PAL[col])
-    block(sl, lx + 0.30, yy, 3.1, 0.2,
-          [P(R(MOV[mid]["t"], SANS, 10, INK2))])
+    title = MOV[mid]["t"]
     gs = " · ".join(GNAME[g] for g in MOV[mid]["g"][:2])
-    block(sl, lx + 3.42, yy + 0.01, 1.7, 0.2, [P(R(gs, SANS, 8, FAINT))])
-    block(sl, lx + 5.16, yy, 0.34, 0.2,
-          [P(R(str(col + 1), MONO, 9, MUTED))])
-    hline(sl, lx, yy + 0.32, 5.5, SOFT)
+    n_t = measure.n_lines(title, SANS, TSZ, TXW)
+    n_g = measure.n_lines(gs, SANS, GSZ, GXW)
+    nl = max(n_t, n_g)
+    h = ROW_H + (nl - 1) * LINE_H
+    # swatch, genre and colour sit on the row's first line, not the row
+    rect(sl, lx, yy + LINE_H / 2 - 0.075, 0.15, 0.15, fill=PAL[col])
+    block(sl, TX0, yy, TXW, n_t * LINE_H, [P(R(title, SANS, TSZ, INK2))])
+    block(sl, GX0, yy, GXW, LINE_H, [P(R(gs, SANS, GSZ, FAINT))],
+          anchor=MSO_ANCHOR.MIDDLE)
+    block(sl, NX0, yy, 0.34, LINE_H,
+          [P(R(str(col + 1), MONO, NSZ, MUTED, align=PP_ALIGN.RIGHT))],
+          anchor=MSO_ANCHOR.MIDDLE)
+    hline(sl, lx, yy + RULE + (nl - 1) * LINE_H, 5.5, SOFT)
+    yy += h
 block(sl, lx + 5.16 + 0.2, ly - 0.26, 0.5, 0.2,
       [P(R("colour", SERIF, 9, FAINT, i=True))])
 

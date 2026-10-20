@@ -107,7 +107,7 @@ export default function CatalogView({ data, uid, setUid, sel, setSel, onRestart 
         </p>
       </header>
 
-      <div className="mt-4 flex items-center justify-between gap-3 border-b border-line-soft">
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-line-soft">
         <div className="flex items-center gap-0.5">
           {(
             [
