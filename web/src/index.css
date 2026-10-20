@@ -1,0 +1,206 @@
+@import 'tailwindcss';
+
+/* IBM Plex: serif for statement lines, sans for chrome, mono for every number.
+   Files are copied from @fontsource into public/fonts at install time. */
+@font-face {
+  font-family: 'Plex Serif';
+  font-style: normal;
+  font-weight: 300 400;
+  font-display: swap;
+  src: url('/fonts/plex-serif-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Plex Sans';
+  font-style: normal;
+  font-weight: 100 700;
+  font-display: swap;
+  src: url('/fonts/plex-sans.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Plex Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/plex-mono-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Plex Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/plex-mono-500.woff2') format('woff2');
+}
+
+/* ---------------------------------------------------------------- tokens
+   Zed register: a blue-black editor stage, one blue action colour, hairline
+   borders, no radius anywhere. Depth is a value step plus a 1px edge, never
+   a glow. Data colours stay the validated categorical set and never double
+   as UI.
+   ----------------------------------------------------------------------- */
+
+@theme {
+  --font-sans: 'Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Plex Serif', ui-serif, Georgia, serif;
+  --font-mono: 'Plex Mono', ui-monospace, 'Cascadia Mono', monospace;
+
+  --color-canvas: #00040a;
+  --color-surface: #0b0d10;
+  --color-raised: #111216;
+  --color-line: #23272e;
+  --color-line-soft: #171a1f;
+  /* every corner is square; `rounded-full` stays available for data dots */
+  --radius-xs: 0px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+  --radius-3xl: 0px;
+  --radius-4xl: 0px;
+
+  --color-ink: #e1e3e7;
+  --color-ink-2: #b2b9c6;
+  --color-muted: #7b8494;
+  --color-faint: #5d6470;
+
+  /* the one action colour; everything interactive leans on it */
+  --color-signal: #2f7bef;
+  --color-signal-hi: #4d92ff;
+  --color-signal-dim: #10233f;
+
+  --color-good: #3fbf6f;
+  --color-bad: #d9655f;
+
+  /* syntax range: the only saturated colour in the product chrome */
+  --color-s1: #6ea8f0;
+  --color-s2: #d07277;
+  --color-s3: #8fbf72;
+  --color-s4: #cbb071;
+  --color-s5: #b477cf;
+  --color-s6: #5fa89c;
+  --color-s7: #d08a6a;
+  --color-s8: #a99ce8;
+  --color-s9: #6eb4bf;
+}
+
+@layer base {
+  /* Scoped deliberately: a bare `* { border-color }` sets a border-image and
+     the browser paints it over canvas bitmaps, turning every graph pink. */
+  *,
+  ::before,
+  ::after {
+    border-color: var(--color-line);
+    border-radius: 0;
+  }
+
+  canvas {
+    border: 0;
+    background: transparent;
+  }
+
+  html {
+    color-scheme: dark;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--color-canvas);
+    /* one faint cool wash at the top, the way the editor lights its frame */
+    background-image: radial-gradient(
+      900px 420px at 50% -12%,
+      color-mix(in oklab, var(--color-signal) 7%, transparent),
+      transparent 68%
+    );
+    background-repeat: no-repeat;
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2 {
+    font-family: var(--font-serif);
+    font-weight: 400;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--color-signal) 34%, transparent);
+  }
+
+  :focus-visible {
+    outline: 1px solid var(--color-signal-hi);
+    outline-offset: 1px;
+  }
+
+  /* Numerals line up everywhere they appear in columns. */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+  }
+}
+
+@layer components {
+  /* A 1px rule that fades, used instead of boxing every row. */
+  .rule-h {
+    background: linear-gradient(90deg, var(--color-line), transparent);
+    height: 1px;
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--color-faint);
+  }
+
+  .scroll-thin {
+    scrollbar-width: thin;
+    scrollbar-color: #262b33 transparent;
+  }
+  .scroll-thin::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  .scroll-thin::-webkit-scrollbar-thumb {
+    background: #262b33;
+  }
+  .scroll-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes draw-line {
+  from {
+    stroke-dashoffset: var(--len, 400);
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

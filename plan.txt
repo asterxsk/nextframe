@@ -1,0 +1,154 @@
+DISCRETE MATHEMATICS · SEMESTER PROJECT
+
+Graph Theory in
+Streaming
+Recommendations
+
+Semester VII · Division B · Batch B2
+
+SUBMITTED BY  C044  C046
+
+C039 C043
+  1 CONCEPT
+
+Concept from Discrete
+Mathematics
+
+Graph Theory
+
+Degree, Connectivity, Path, Cycle, Eulerian and Hamiltonian Graphs,
+Planar Graphs, and Graph Coloring.
+
+Every idea used in this project comes directly from these seven topics. The
+recommendation problem is treated as a question about a graph, and each
+topic answers a different part of that question, from how popular a piece of
+content is, to how a user's watch queue should be ordered, to how the
+whole system is drawn and colored so it stays readable and varied.
+  2 OVERVIEW
+
+Project Overview
+
+This project looks at how streaming platforms
+decide what to show a user next, and treats that as
+a graph problem.
+
+T  he platform's users and content are represented as a graph, and
+   each topic from the course is used to solve one specific part of the
+   recommendation problem. Degree and connectivity are used to see
+
+which content is actually popular and whether users naturally form groups
+
+based on similar taste. They also help check whether the recommendation
+
+system can reach every group of users, or whether some are left out.
+
+Path length is used to measure how relevant a piece of content is to a user,
+where a shorter path means a closer match. Cycles are used to spot a
+common problem, where a user keeps getting shown the same narrow set of
+content instead of anything new.
+
+Eulerian and Hamiltonian graphs are used to build two different viewing
+experiences. An Eulerian circuit is used to create a playlist that moves
+smoothly between genres, and a Hamiltonian path is used to build a single,
+ordered watch list for one user. Planar graphs and graph coloring handle
+the final part of the project. A planar layout keeps the recommendation
+graph easy to read without lines crossing over each other, and graph
+coloring is used to make sure a user is not shown several very similar items
+in a row.
+
+A small sample dataset of users and content is used throughout the project,
+so that each of these ideas can be shown working on the same example by
+the end.
+  3 TEAM
+
+Team and Concept
+Ownership
+
+ROLL NO.  CONCEPT OWNED
+
+C039      Degree and Connectivity
+C043      Path and Cycle
+C044      Eulerian and Hamiltonian Graphs
+C046      Planar Graphs and Graph Coloring
+  4 WEEK ONE                                       01
+
+Foundations
+
+ROLL  TASK                            DELIVERABLE
+NO.
+      Build the sample dataset of     Sample dataset and a degree
+C039  users and content items, and    table for each node.
+      calculate the degree of every
+C043  node in the graph.              Written definitions with two or
+                                      three worked examples of
+C044  Define path and cycle for the   paths and cycles.
+      graph using the sample
+C046  dataset, and mark out a few     A short note on which
+      real examples from it.          conditions are met, and what
+                                      adjustments the dataset needs.
+      Check whether the sample
+      graph meets the conditions for  Introduction and problem
+      an Eulerian or Hamiltonian      statement, ready to place in
+      graph, and note any changes     the final report.
+      needed if it does not.
+
+      Write the introduction and
+      problem statement, explaining
+      why graph theory fits this
+      problem.
+  5 WEEK TWO                                       02
+
+Core Work
+
+ROLL  TASK                            DELIVERABLE
+NO.
+      Find the connected              List of connected components
+C039  components in the graph, and    and a popularity ranking with
+C043  use degree values to rank       reasoning.
+      content by popularity.
+C044                                  Shortest path table with
+      Calculate the shortest path     relevance scores, and a short
+C046  from a sample user to every     explanation of any cycle found.
+      item, and use path length as a
+      relevance score. Identify any   Genre transition diagram with
+      cycles and explain what they    the Eulerian circuit and
+      mean for repeated               Hamiltonian path marked out.
+      recommendations.
+                                      Planar layout attempt, or an
+      Build a smaller genre           explanation if it is not possible,
+      transition graph, and work out  and a colored graph diagram.
+      an Eulerian circuit for a
+      playlist and a Hamiltonian
+      path for a single user's watch
+      order.
+
+      Try to draw the
+      recommendation graph as a
+      planar graph, and apply graph
+      coloring so that similar items
+      are not placed next to each
+      other.
+03 6 WEEK THREE
+
+Integration and Report
+
+ROLL  TASK                             DELIVERABLE
+NO.
+      Put together the final degree    Final section write-up with
+C039  and connectivity results, along  diagram.
+      with one summary diagram.
+C043                                   Final section write-up with the
+      Put together the final path and  worked example.
+C044  cycle results, with the worked
+      example carried through.         Final section write-up with the
+C046                                   playlist and watch order
+      Put together the final Eulerian  example.
+      and Hamiltonian results,
+      including the example playlist   Complete report and
+      and watch order.                 presentation, ready for
+                                       submission.
+      Assemble the full report and
+      presentation, and check that
+      every section is consistent
+      before submission.
+

@@ -1,0 +1,16 @@
+# graft's local graph cache — regenerable, not committed (run `graft build`).
+/graft/
+
+# dependencies and build output
+web/node_modules/
+web/dist/
+
+# python
+__pycache__/
+*.pyc
+
+# the zipped MovieLens download; the extracted csvs next to it are committed
+data/raw/*.zip
+
+# the hairline figure's render artifacts, reproducible with look.mjs
+web/figures/hairline-*.png
