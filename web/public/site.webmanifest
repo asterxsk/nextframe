@@ -1,0 +1,15 @@
+{
+  "name": "NextFrame",
+  "short_name": "NextFrame",
+  "description": "Graph theory in streaming recommendations — a recommendation engine built as a graph problem over the MovieLens archive.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#00040a",
+  "theme_color": "#00040a",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}

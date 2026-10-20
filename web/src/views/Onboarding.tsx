@@ -275,6 +275,21 @@ function SearchBox({
       .slice(0, 12);
   }, [q, data.movies]);
 
+  /**
+   * A 2025 or 2026 film is in the catalogue but outside the archive, so no
+   * viewer can be matched through it. Saying "no title matches that" would be
+   * a lie when the film is right there in the browse tab — show it, greyed,
+   * with the reason.
+   */
+  const unrated = useMemo(() => {
+    const s = q.trim().toLowerCase();
+    if (!s) return [];
+    return data.recent
+      .filter((m) => m.t.toLowerCase().includes(s))
+      .sort((a, b) => b.y - a.y)
+      .slice(0, 4);
+  }, [q, data.recent]);
+
   return (
     <div>
       <label className="flex items-center gap-2 border border-[#2b3038] bg-raised px-2.5 py-2 focus-within:border-signal/70">
@@ -336,9 +351,27 @@ function SearchBox({
             </button>
           );
         })}
-        {!results.length && (
+        {unrated.map((m) => (
+          <div
+            key={`recent-${m.t}`}
+            className="flex items-center gap-2 border-l-2 border-transparent px-2 py-1.5 opacity-55"
+          >
+            <span className="min-w-0 flex-1 truncate text-[11.5px] text-ink-2">
+              {m.t}
+              <span className="ml-1.5 text-faint">{m.y}</span>
+            </span>
+            <span className="shrink-0 font-mono text-[9px] text-faint">not in the archive</span>
+          </div>
+        ))}
+        {!results.length && !unrated.length && (
           <div className="px-2 py-4 text-center font-mono text-[10.5px] text-faint">
             no title matches that
+          </div>
+        )}
+        {!results.length && unrated.length > 0 && (
+          <div className="border-t border-line-soft px-2 py-2 text-center font-mono text-[10px] leading-relaxed text-faint">
+            A viewer can only be matched through titles the archive rated, so this one cannot start a
+            search — it is listed in the catalogue as a recent release.
           </div>
         )}
       </div>

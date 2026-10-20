@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="NextFrame">
+  <title>NextFrame</title>
+  <rect width="512" height="512" fill="#00040a"/>
+  <!-- one alternating walk, drawn as the app draws it: viewer, title, candidate -->
+  <path d="M166 346 256 256M256 256 346 166" stroke="#46515e" stroke-width="20" stroke-linecap="square"/>
+  <rect x="46" y="346" width="120" height="120" fill="#6ea8f0"/>
+  <rect x="196" y="196" width="120" height="120" fill="#8fbf72"/>
+  <rect x="346" y="46" width="120" height="120" fill="#2f7bef"/>
+</svg>
