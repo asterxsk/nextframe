@@ -171,6 +171,17 @@ export const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.ma
 export const genreLabel = (b: Bundle, i: number) => b.genres[i]?.n ?? 'Other';
 export const shortYear = (y: number | null) => (y ? String(y) : 'n/a');
 
+/**
+ * Recent releases carry no MovieLens id, so a picker addresses them with a
+ * negative id taken from their position in the bundle. Archive ids are all
+ * positive, so the two id spaces cannot collide.
+ */
+export const recentId = (index: number) => -(index + 1);
+
+/** The title behind an id the picker may hold: an archive movie or a recent film. */
+export const titleById = (b: Bundle, id: number) =>
+  id < 0 ? b.recent[-id - 1]?.t : b.movies.find((m) => m.id === id)?.t;
+
 export const overlap = (a: number[], b: number[]) => {
   const s = new Set(a);
   let n = 0;

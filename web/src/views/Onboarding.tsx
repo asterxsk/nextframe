@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, Check, MagnifyingGlass } from '@phosphor-icons/react';
 import type { Bundle, Movie, User } from '@/lib/data';
-import { colorAt, fmtInt } from '@/lib/data';
+import { colorAt, fmtInt, recentId, titleById } from '@/lib/data';
 import { prefersReduced } from '@/lib/hooks';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -65,15 +65,42 @@ export default function Onboarding({ data, onDone }: Props) {
       return scored.slice(0, 40);
     }
     if (!chosen.length) return null;
-    const hit = new Set(chosen);
+    // A recent pick has no archive id to test for, so it is matched through
+    // its genres: a viewer counts for it if they liked a title in those
+    // genres, and the ranking then favours whoever watches that genre most.
+    // `owned` stays the exact count — titles the viewer literally liked — so
+    // the "you both liked" figure never claims a genre hit as a shared title.
+    const hit = new Set(chosen.filter((id) => id > 0));
+    const recentGenres = chosen
+      .filter((id) => id < 0)
+      .map((id) => new Set(data.recent[-id - 1]?.g ?? []));
     const scored = data.users.map((u) => {
-      const shared = u.likes.filter((id) => hit.has(id)).length;
-      return { u, score: shared / hit.size, owned: shared, share: shared / hit.size };
+      const owned = u.likes.filter((id) => hit.has(id)).length;
+      let covered = 0;
+      let affinity = 0;
+      for (const want of recentGenres) {
+        let n = 0;
+        for (const id of u.likes) if (byId.get(id)?.g.some((g) => want.has(g))) n++;
+        if (n) covered++;
+        affinity += n / Math.max(1, u.n);
+      }
+      const score = (owned + covered) / chosen.length;
+      return {
+        u,
+        score,
+        owned,
+        covered,
+        // a genre-only hit is not a shared title, so the two rates differ
+        share: owned / chosen.length,
+        // exact shared titles first, then how much of the recent picks' genres
+        // the viewer actually watches
+        fit: owned + affinity,
+      };
     });
     // a viewer who liked all of them beats one who liked most of a longer history
-    scored.sort((a, b) => b.owned - a.owned || b.score - a.score);
-    return scored.filter((s) => s.owned > 0).slice(0, 40);
-  }, [mode, picked, chosen, data.users, byId]);
+    scored.sort((a, b) => b.fit - a.fit || b.owned - a.owned);
+    return scored.filter((s) => s.fit > 0).slice(0, 40);
+  }, [mode, picked, chosen, data.users, data.recent, byId]);
 
   const best = matches?.[0]?.u ?? null;
   const recs = best ? (data.recs[String(best.id)] ?? []).slice(0, 3) : [];
@@ -188,7 +215,8 @@ export default function Onboarding({ data, onDone }: Props) {
                 />
                 <p className="mt-3 text-[11.5px] leading-relaxed text-muted">
                   Draft a short watchlist. The archive viewer who shares the most of these is the
-                  one your recommendations come from.
+                  one your recommendations come from. 2025 and 2026 releases are selectable too —
+                  the archive never rated them, so they match by genre.
                 </p>
               </>
             )}
@@ -266,29 +294,35 @@ function SearchBox({
   pickedSet: Set<number>;
 }) {
   const input = useRef<HTMLInputElement | null>(null);
-  const results = useMemo(() => {
-    const s = q.trim().toLowerCase();
-    if (!s) return data.movies.slice(0, 8);
-    return data.movies
-      .filter((m) => m.t.toLowerCase().includes(s))
-      .sort((a, b) => b.d - a.d)
-      .slice(0, 12);
-  }, [q, data.movies]);
+  const s = q.trim().toLowerCase();
 
-  /**
-   * A 2025 or 2026 film is in the catalogue but outside the archive, so no
-   * viewer can be matched through it. Saying "no title matches that" would be
-   * a lie when the film is right there in the browse tab — show it, greyed,
-   * with the reason.
-   */
-  const unrated = useMemo(() => {
-    const s = q.trim().toLowerCase();
-    if (!s) return [];
-    return data.recent
-      .filter((m) => m.t.toLowerCase().includes(s))
-      .sort((a, b) => b.y - a.y)
-      .slice(0, 4);
-  }, [q, data.recent]);
+  // One result list, not two: a 2025 film is as selectable as a 2005 one.
+  // What differs is how the pick is matched (an archive id is shared with
+  // viewers; a recent film is matched through its genres), so the row says
+  // which and nothing is greyed out or made untouchable.
+  const results = useMemo(() => {
+    type Row = { key: string; id: number; t: string; y: number; gn: string[] };
+    const fromArchive: Row[] = data.movies
+      .filter((m) => !s || m.t.toLowerCase().includes(s))
+      .sort((a, b) => b.d - a.d)
+      .slice(0, s ? 12 : 6)
+      .map((m) => ({ key: `m${m.id}`, id: m.id, t: m.t, y: m.y ?? 0, gn: m.gn }));
+    const fromRecent: Row[] = data.recent
+      .map((m, i) => ({ m, i }))
+      .filter(({ m }) => !s || m.t.toLowerCase().includes(s))
+      .sort((a, b) => b.m.y - a.m.y || a.m.t.localeCompare(b.m.t))
+      .slice(0, s ? 4 : 2)
+      .map(({ m, i }) => ({
+        key: `r${i}`,
+        id: recentId(i),
+        t: m.t,
+        y: m.y,
+        gn: m.g.map((g) => data.genres[g]?.n ?? 'Other'),
+      }));
+    return [...fromArchive, ...fromRecent];
+  }, [s, data.movies, data.recent, data.genres]);
+
+  const firstPick = results[0];
 
   return (
     <div>
@@ -299,12 +333,12 @@ function SearchBox({
           value={q}
           onChange={(e) => setQ(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === 'Enter' && results[0]) {
-              onAdd(results[0].id);
+            if (e.key === 'Enter' && firstPick) {
+              onAdd(firstPick.id);
               setQ('');
             }
           }}
-          placeholder="Search 1,437 titles"
+          placeholder={`Search ${fmtInt(data.meta.movies + data.recent.length)} titles`}
           className="w-full bg-transparent font-mono text-[12px] text-ink placeholder:text-faint focus:outline-none"
           aria-label="Search the catalogue"
         />
@@ -312,19 +346,17 @@ function SearchBox({
 
       {chosen.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-1">
-          {chosen.map((id) => {
-            const m = data.movies.find((x) => x.id === id);
-            return (
-              <button
-                key={id}
-                onClick={() => onAdd(id)}
-                className="group flex items-center gap-1.5 border border-[#2b3038] bg-raised px-1.5 py-1 text-[11px] text-ink-2 hover:border-[#3a414b] hover:text-ink"
-              >
-                <span className="truncate">{m?.t ?? id}</span>
-                <span className="text-faint group-hover:text-signal">×</span>
-              </button>
-            );
-          })}
+          {chosen.map((id) => (
+            <button
+              key={id}
+              onClick={() => onAdd(id)}
+              className="group flex items-center gap-1.5 border border-[#2b3038] bg-raised px-1.5 py-1 text-[11px] text-ink-2 hover:border-[#3a414b] hover:text-ink"
+            >
+              <span className="truncate">{titleById(data, id) ?? id}</span>
+              {id < 0 && <span className="shrink-0 font-mono text-[8px] text-faint">genre match</span>}
+              <span className="text-faint group-hover:text-signal">×</span>
+            </button>
+          ))}
         </div>
       )}
 
@@ -333,8 +365,9 @@ function SearchBox({
           const on = pickedSet.has(m.id);
           return (
             <button
-              key={m.id}
+              key={m.key}
               onClick={() => onAdd(m.id)}
+              aria-pressed={on}
               className={cn(
                 'flex items-center gap-2 px-2 py-1.5 text-left transition-colors',
                 on ? 'bg-signal/[0.12]' : 'bg-surface hover:bg-white/[0.04]',
@@ -342,7 +375,7 @@ function SearchBox({
             >
               <span className="min-w-0 flex-1 truncate text-[11.5px] text-ink-2">
                 {m.t}
-                {m.y && <span className="ml-1.5 text-faint">{m.y}</span>}
+                <span className="ml-1.5 text-faint">{m.y}</span>
               </span>
               <span className="shrink-0 font-mono text-[9px] text-faint">
                 {m.gn.slice(0, 2).join(' / ')}
@@ -351,30 +384,20 @@ function SearchBox({
             </button>
           );
         })}
-        {unrated.map((m) => (
-          <div
-            key={`recent-${m.t}`}
-            className="flex items-center gap-2 border-l-2 border-transparent px-2 py-1.5 opacity-55"
-          >
-            <span className="min-w-0 flex-1 truncate text-[11.5px] text-ink-2">
-              {m.t}
-              <span className="ml-1.5 text-faint">{m.y}</span>
-            </span>
-            <span className="shrink-0 font-mono text-[9px] text-faint">not in the archive</span>
-          </div>
-        ))}
-        {!results.length && !unrated.length && (
+        {!results.length && (
           <div className="px-2 py-4 text-center font-mono text-[10.5px] text-faint">
             no title matches that
           </div>
         )}
-        {!results.length && unrated.length > 0 && (
-          <div className="border-t border-line-soft px-2 py-2 text-center font-mono text-[10px] leading-relaxed text-faint">
-            A viewer can only be matched through titles the archive rated, so this one cannot start a
-            search — it is listed in the catalogue as a recent release.
-          </div>
-        )}
       </div>
+
+      {chosen.some((id) => id < 0) && (
+        <p className="mt-2 border-l-2 border-signal/40 pl-2 font-mono text-[10px] leading-relaxed text-faint">
+          A 2025+ pick is released after the archive ends, so no viewer rated it. It counts by genre:
+          the match goes to the archive viewers who liked the most titles in that genre. Every
+          recommendation that follows is still computed from real ratings.
+        </p>
+      )}
     </div>
   );
 }
@@ -392,8 +415,8 @@ function Match({
 }: {
   data: Bundle;
   best: User | null;
-  matches: { u: User; score: number; owned: number; share: number }[];
-  recs: { m: number; s: number; cyc: number }[];
+  matches: { u: User; score: number; owned: number; covered?: number; share: number }[];
+  recs: { m: number; s: number; cyc: number; cand: number }[];
   picked: number[];
   chosen: number[];
   mode: 'taste' | 'titles';
@@ -405,7 +428,15 @@ function Match({
   const shared =
     mode === 'taste'
       ? picked.map((g) => `${data.genres[g]?.n} (${data.genres[g]?.c})`).join(', ')
-      : chosen.map((id) => byId.get(id)?.t ?? id).join(', ');
+      : chosen.map((id) => titleById(data, id) ?? id).join(', ');
+
+  // With a 2025+ pick there may be no title the viewer literally shares, only
+  // genre overlap. Label whichever number is actually being shown.
+  const top = matches[0];
+  const genreOnly = mode === 'titles' && !top?.owned && (top?.covered ?? 0) > 0;
+  const matchLabel = mode === 'taste' || genreOnly ? 'in your genres' : 'you both liked';
+  const matchValue =
+    mode === 'taste' ? (top?.owned ?? 0) : genreOnly ? (top?.covered ?? 0) : (top?.owned ?? 0);
 
   return (
     <div className="mt-10 border-t border-line pt-8">
@@ -428,8 +459,7 @@ function Match({
                 likes <span className="text-ink">{fmtInt(best.n)}</span>
               </span>
               <span className="text-muted">
-                {mode === 'taste' ? 'in your genres' : 'you both liked'}{' '}
-                <span className="text-ink">{fmtInt(matches[0]?.owned ?? 0)}</span>
+                {matchLabel} <span className="text-ink">{fmtInt(matchValue)}</span>
               </span>
               <span className="text-muted">
                 top genre <span className="text-ink">{data.genres[best.genres[0]]?.n ?? '—'}</span>
@@ -459,7 +489,9 @@ function Match({
               <h2 className="font-mono text-[10px] uppercase tracking-[0.09em] text-muted">
                 What we would start you on
               </h2>
-              <span className="font-mono text-[9.5px] text-faint">top 3 of 1,275 scored</span>
+              <span className="font-mono text-[9.5px] text-faint">
+                top 3 of {fmtInt(recs[0]?.cand ?? 0)} scored
+              </span>
             </div>
             <ol className="p-2">
               {recs.map((r, i) => {
@@ -493,14 +525,17 @@ function Match({
               </h2>
             </div>
             <div className="flex flex-wrap gap-1.5 p-3">
-              {matches.slice(0, 8).map(({ u, owned }) => (
+              {matches.slice(0, 8).map(({ u, owned, covered }) => (
                 <button
                   key={u.id}
                   onClick={() => onDone(u.id)}
                   className="flex items-center gap-2 border border-line px-2 py-1 font-mono text-[10px] text-ink-2 transition-colors hover:border-[#3a414b] hover:text-ink"
                 >
                   viewer {u.id}
-                  <span className="text-faint">{owned}</span>
+                  {/* with only a 2025+ pick nothing is shared by id; show the genre count instead */}
+                  <span className="text-faint">
+                    {owned > 0 || !covered ? owned : `${covered} by genre`}
+                  </span>
                 </button>
               ))}
             </div>

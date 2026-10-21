@@ -288,14 +288,19 @@ RECENT_CSV = os.path.join(ROOT, "data", "recent", "recent_films.csv")
 
 
 def recent_layer(genre_names):
-    """Films released after the MovieLens snapshot, listed but never scored.
+    """Films released after the MovieLens snapshot, listed and never scored.
 
     The archive ends in 2018, so a 2025 Bollywood release has no ratings here
     and therefore no audience, no similarity edges and no path count. Putting
     one into `movies` would mean inventing the numbers the whole project is
     about, so they travel in their own list: a real title, a real year, real
-    genres, and three fields left explicitly empty. The UI says so rather than
-    showing a zero that would read as a measurement.
+    genres, and three fields left explicitly empty. The UI never claims a zero
+    as a measurement.
+
+    They are selectable in the app, though. A picker addresses one by its
+    position here (web/src/lib/data.ts turns that into a negative id), and the
+    viewer match falls back to genre overlap — the one signal the archive does
+    carry for a film it has never rated.
     """
     if not os.path.exists(RECENT_CSV):
         return []
