@@ -202,9 +202,7 @@ def slide(label: str | None = None, title: str | None = None, notes: str = "",
         block(sl, ML, 0.78 + (29 - size) * 0.014, box, 1.6,
               [P(R(title, SERIF, size, INK))])
         hline(sl, ML, 1.60, MR - ML, LINE)
-    # footer
-    block(sl, ML, 6.98, 6.0, 0.2,
-          [P(R("NextFrame · discrete mathematics, semester VII", SERIF, 9, FAINT, i=True))])
+    # footer: page number only
     block(sl, MR - 1.1, 6.98, 1.1, 0.2,
           [P(R(f"{_n[0]} / 14", MONO, 9, FAINT))])
     if notes:

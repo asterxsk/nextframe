@@ -160,9 +160,6 @@ function Frame({
         </motion.h2>
       )}
       <div className="absolute left-[81.6px] right-[81.6px] top-[153.6px] h-px bg-line" />
-      <div className="absolute left-[81.6px] top-[668px] font-serif text-[12px] italic text-faint">
-        NextFrame · discrete mathematics, semester VII
-      </div>
       <div className="absolute right-[81.6px] top-[668px] font-mono text-[12px] text-faint">
         {page} / 14
       </div>
