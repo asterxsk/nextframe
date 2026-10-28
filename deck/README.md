@@ -31,8 +31,8 @@ those files undoes it.
 | Slides | Presenter | Topic |
 |---|---|---|
 | 2–4 | C039 | graph construction, degree, connectivity |
-| 5–7 | C043 | path, cycle, the weighted score |
-| 8–10 | C044 | Euler's condition, Eulerisation, Hamiltonian order |
+| 5–7 | C044 | path, cycle, the weighted score |
+| 8–10 | C043 | Euler's condition, Eulerisation, Hamiltonian order |
 | 11–13 | C046 | planarity, the planar drawing, colouring |
 
 ## Conventions

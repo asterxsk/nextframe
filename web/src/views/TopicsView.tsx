@@ -28,7 +28,7 @@ export default function TopicsView({ data, uid }: { data: Bundle; uid: number })
         </div>
         <p className="max-w-[54ch] text-[13px] leading-relaxed text-ink-2">
           Every number here is computed from the archive, not illustrated. Ownership follows the
-          project plan: C039 degree and connectivity, C043 path and cycle, C044 Eulerian and
+          project plan: C039 degree and connectivity, C044 path and cycle, C043 Eulerian and
           Hamiltonian, C046 planar and colouring.
         </p>
       </header>
@@ -344,7 +344,7 @@ function PathTopic({ data, uid }: { data: Bundle; uid: number }) {
   return (
     <Topic
       n={3}
-      owner="C043 · path"
+      owner="C044 · path"
       title="Path length is relevance"
       thesis={
         <>
@@ -485,7 +485,7 @@ function CycleTopic({ data, uid }: { data: Bundle; uid: number }) {
   return (
     <Topic
       n={4}
-      owner="C043 · cycle"
+      owner="C044 · cycle"
       title="Cycles measure echo"
       thesis={
         <>
@@ -564,7 +564,7 @@ function EulerTopic({ data }: { data: Bundle }) {
   return (
     <Topic
       n={5}
-      owner="C044 · Eulerian"
+      owner="C043 · Eulerian"
       title="A playlist that uses every genre edge once"
       thesis={
         <>
@@ -780,7 +780,7 @@ function HamiltonTopic({ data, uid }: { data: Bundle; uid: number }) {
   return (
     <Topic
       n={6}
-      owner="C044 · Hamiltonian"
+      owner="C043 · Hamiltonian"
       title="A watch order with no filler between"
       thesis={
         <>

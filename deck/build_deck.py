@@ -172,8 +172,8 @@ def hline(sl, x, y, w, color=LINE, lw=0.75):
 # ---------------------------------------------------------------- chrome
 PERSON = {
     "C039": "Degree and connectivity",
-    "C043": "Path and cycle",
-    "C044": "Eulerian and Hamiltonian",
+    "C044": "Path and cycle",
+    "C043": "Eulerian and Hamiltonian",
     "C046": "Planar graphs and colouring",
 }
 _n = [0]
@@ -509,10 +509,10 @@ note(sl, bx, 6.20,
 
 
 # =====================================================================
-# 5 — path  (C043)
+# 5 — path  (C044)
 # =====================================================================
 sl = slide(
-    "Path · C043",
+    "Path · C044",
     "A recommendation is a path, and the app draws it",
     notes=(
         "A path here is not an abstraction — it is the witness. Viewer, co-liker, "
@@ -567,10 +567,10 @@ note(sl, ML, 4.22,
 
 
 # =====================================================================
-# 6 — cycle  (C043)
+# 6 — cycle  (C044)
 # =====================================================================
 sl = slide(
-    "Cycle · C043",
+    "Cycle · C044",
     "Cycles measure echo, and echo must be divided out",
     notes=(
         "Every path closes into a cycle, and a cycle means agreement already "
@@ -625,10 +625,10 @@ note(sl, 6.60, 5.62,
 
 
 # =====================================================================
-# 7 — the score  (C043)
+# 7 — the score  (C044)
 # =====================================================================
 sl = slide(
-    "Weighted graph · C043",
+    "Weighted graph · C044",
     "The score multiplies three terms, each a graph fact",
     notes=(
         "This is the arithmetic the app shows on screen, line by line. "
@@ -696,10 +696,10 @@ note(sl, 7.05, 5.86,
 
 
 # =====================================================================
-# 8 — Euler  (C044)
+# 8 — Euler  (C043)
 # =====================================================================
 sl = slide(
-    "Eulerian graphs · C044",
+    "Eulerian graphs · C043",
     "Euler's theorem says no, and the degrees say why",
     notes=(
         "Build the genre graph: two genres are adjacent when a title carries both, "
@@ -760,10 +760,10 @@ note(sl, ML, 5.72,
 
 
 # =====================================================================
-# 9 — Eulerisation  (C044)
+# 9 — Eulerisation  (C043)
 # =====================================================================
 sl = slide(
-    "Eulerian graphs · C044",
+    "Eulerian graphs · C043",
     "Ten odd vertices, five pairs, nine duplicated edges",
     notes=(
         "This is the route-inspection repair. Pair the odd vertices greedily by "
@@ -822,10 +822,10 @@ note(sl, 6.55, 6.20,
 
 
 # =====================================================================
-# 10 — Hamiltonian  (C044)
+# 10 — Hamiltonian  (C043)
 # =====================================================================
 sl = slide(
-    "Hamiltonian graphs · C044",
+    "Hamiltonian graphs · C043",
     "A watch order is a Hamiltonian path over the top ten",
     notes=(
         "Different question: visit every vertex exactly once, not every edge. "
@@ -1141,8 +1141,8 @@ block(sl, ML, 5.36, 9.4, 0.9, [
 ])
 hline(sl, ML, 6.28, 9.45, LINE)
 block(sl, ML, 6.42, 9.45, 0.3, [
-    P(R("C039  degree, connectivity      C043  path, cycle      "
-        "C044  Eulerian, Hamiltonian      C046  planar, colouring",
+    P(R("C039  degree, connectivity      C043  Eulerian, Hamiltonian      "
+        "C044  path, cycle      C046  planar, colouring",
         MONO, 8.5, FAINT)),
 ])
 

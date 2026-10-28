@@ -827,7 +827,7 @@ function PathSlide({ data, page }: SlideProps) {
   return (
     <Frame
       page={page}
-      label="Path · C043"
+      label="Path · C044"
       title="A recommendation is a path, and the app draws it"
     >
       <Lede w={484.8}>
@@ -929,7 +929,7 @@ function CycleSlide({ data, page }: SlideProps) {
   return (
     <Frame
       page={page}
-      label="Cycle · C043"
+      label="Cycle · C044"
       title="Cycles measure echo, and echo must be divided out"
     >
       <Lede w={484.8}>
@@ -1067,7 +1067,7 @@ function ScoreSlide({ data, page }: SlideProps) {
   return (
     <Frame
       page={page}
-      label="Weighted graph · C043"
+      label="Weighted graph · C044"
       title="The score multiplies three terms, each a graph fact"
     >
       <motion.div
@@ -1172,7 +1172,7 @@ function EulerSlide({ data, page }: SlideProps) {
   return (
     <Frame
       page={page}
-      label="Eulerian graphs · C044"
+      label="Eulerian graphs · C043"
       title="Euler's theorem says no, and the degrees say why"
     >
       <Lede w={484.8}>
@@ -1289,7 +1289,7 @@ function EulerPairSlide({ data, page }: SlideProps) {
   return (
     <Frame
       page={page}
-      label="Eulerian graphs · C044"
+      label="Eulerian graphs · C043"
       title="Ten odd vertices, five pairs, nine duplicated edges"
     >
       <Lede w={484.8}>
@@ -1381,7 +1381,7 @@ function HamiltonianSlide({ data, page }: SlideProps) {
   return (
     <Frame
       page={page}
-      label="Hamiltonian graphs · C044"
+      label="Hamiltonian graphs · C043"
       title="A watch order is a Hamiltonian path over the top ten"
     >
       <Lede w={470.4}>
@@ -1925,8 +1925,8 @@ function ConclusionSlide({ data, page }: SlideProps) {
         {...rise(0.58, 4)}
         className="absolute left-[81.6px] top-[616.3px] w-[907.2px] font-mono text-[11.3px] text-faint"
       >
-        C039&nbsp; degree, connectivity&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; C043&nbsp; path, cycle
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; C044&nbsp; Eulerian, Hamiltonian &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        C039&nbsp; degree, connectivity&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; C043&nbsp; Eulerian, Hamiltonian
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; C044&nbsp; path, cycle &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         C046&nbsp; planar, colouring
       </motion.div>
     </Frame>
