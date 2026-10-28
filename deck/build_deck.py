@@ -398,7 +398,7 @@ facts(sl, ML, 3.96, 5.05, [
     ("mean similarity degree", f'{META["meanDegree"]:.2f}'),
     ("median", str(META["medianDegree"])),
     ("maximum", f'{META["maxDegree"]}  ·  The Sweet Hereafter'),
-    ("sum of degrees", f'{n(B["stats"]["handshake"])} = 2 × {n(META["edges"])}'),
+    ("sum of degrees", f'{n(sum(d * c for d, c in B["degreeDist"]))} = 2 × {n(META["edges"])}'),
     ("edge density", "0.0082"),
     ("mean audience size", f'{META["meanAudience"]:.2f}'),
 ], accent=(0,), value_frac=0.56)

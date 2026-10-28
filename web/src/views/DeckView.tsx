@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState, type ReactElement, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactElement, type ReactNode } from 'react';
 import { motion } from 'motion/react';
-import { ArrowLeft, ArrowRight } from '@phosphor-icons/react';
+import { ArrowLeft, ArrowRight, CornersIn, CornersOut } from '@phosphor-icons/react';
 import type { Bundle } from '@/lib/data';
 import { colorAt, fmtInt } from '@/lib/data';
 import { prefersReduced, useSize } from '@/lib/hooks';
@@ -606,6 +606,9 @@ function DegreeSlide({ data, page }: SlideProps) {
   const hi = 26;
   let tail = 0;
   for (const [d, c] of dist) if (d > hi) tail += c;
+  // similarity degree summed over every vertex, i.e. twice the edge count;
+  // stats.handshake is the audience-size total and is a different number
+  const sumDegree = (data.degreeDist as [number, number][]).reduce((a, [d, c]) => a + d * c, 0);
   const bars: [string, number][] = [];
   for (let d = lo; d <= hi; d++) bars.push([String(d), dist.get(d) ?? 0]);
   bars.push([`${hi + 1}+`, tail]);
@@ -631,7 +634,7 @@ function DegreeSlide({ data, page }: SlideProps) {
           ['mean similarity degree', m.meanDegree.toFixed(2)],
           ['median', String(m.medianDegree)],
           ['maximum', `${m.maxDegree}  ·  The Sweet Hereafter`],
-          ['sum of degrees', `${fmtInt(data.stats.handshake)} = 2 × ${fmtInt(m.edges)}`],
+          ['sum of degrees', `${fmtInt(sumDegree)} = 2 × ${fmtInt(m.edges)}`],
           ['edge density', '0.0082'],
           ['mean audience size', m.meanAudience.toFixed(2)],
         ]}
@@ -1981,7 +1984,27 @@ export default function DeckView({
 }) {
   const [i, setI] = useState(0);
   const [stage, size] = useSize<HTMLDivElement>();
+  const shell = useRef<HTMLDivElement>(null);
+  const [fs, setFs] = useState(false);
+  // iOS Safari only offers fullscreen on a video element, so the button is
+  // simply not drawn where the API is missing.
+  const canFs = typeof document !== 'undefined' && !!document.documentElement.requestFullscreen;
   const n = SLIDES.length;
+
+  useEffect(() => {
+    const onChange = () => setFs(document.fullscreenElement === shell.current);
+    document.addEventListener('fullscreenchange', onChange);
+    return () => document.removeEventListener('fullscreenchange', onChange);
+  }, []);
+
+  const toggleFullscreen = async () => {
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen();
+      else await shell.current?.requestFullscreen();
+    } catch {
+      // a browser that refuses the request leaves the deck as it is
+    }
+  };
 
   // A tab click leaves focus on the tab strip, where the arrows belong to the
   // tabs; the slide stage takes it back so ← and → drive the deck.
@@ -2013,6 +2036,11 @@ export default function DeckView({
       } else if (e.code === 'Space') {
         e.preventDefault();
         step((v) => (e.shiftKey ? v - 1 : v + 1));
+      } else if (e.key === 'f' || e.key === 'F') {
+        if (!e.metaKey && !e.ctrlKey) toggleFullscreen();
+      } else if (e.key === 'Escape' && document.fullscreenElement) {
+        // the browser also handles this; exiting here keeps state in step
+        void document.exitFullscreen();
       }
     };
     addEventListener('keydown', onKey);
@@ -2023,13 +2051,25 @@ export default function DeckView({
   const scale = size.w > 0 ? size.w / BASE_W : 1;
 
   return (
-    <div className="pt-5">
-      <div className="mx-auto flex max-w-[1280px] flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b border-line-soft pb-2.5">
+    <div
+      ref={shell}
+      className={cn(
+        'pt-5',
+        fs && 'flex h-dvh flex-col bg-canvas px-4 pt-0',
+      )}
+    >
+      <div
+        className={cn(
+          'mx-auto flex max-w-[1280px] flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b border-line-soft pb-2.5',
+          fs && 'hidden',
+        )}
+      >
         <div className="eyebrow">Presentation · C039 – C046</div>
         <div className="flex items-center gap-4 font-mono text-[9.5px] uppercase tracking-[0.08em] text-faint">
-          <span className="hidden sm:inline">← → to move · space to advance</span>
-          {onStart && (
-            <button
+          <span className="hidden sm:inline">
+            ← → to move · space to advance{canFs ? ' · f for fullscreen' : ''}
+          </span>
+          {onStart && (            <button
               onClick={onStart}
               className="uppercase tracking-[0.08em] text-faint transition-colors hover:text-signal"
             >
@@ -2039,13 +2079,15 @@ export default function DeckView({
         </div>
       </div>
 
-      <div className="mt-4 flex justify-center">
+      <div className={cn('mt-4 flex justify-center', fs && 'mt-0 flex-1 items-center')}>
         <div
           ref={stage}
           tabIndex={-1}
           className="relative w-full overflow-hidden border border-line bg-canvas outline-none"
           style={{
-            width: 'min(100%, calc((100dvh - 210px) * 16 / 9))',
+            width: fs
+              ? 'min(100%, calc((100dvh - 96px) * 16 / 9))'
+              : 'min(100%, calc((100dvh - 210px) * 16 / 9))',
             aspectRatio: '16 / 9',
           }}
           aria-roledescription="slide"
@@ -2087,6 +2129,19 @@ export default function DeckView({
           >
             <ArrowRight size={12} weight="bold" />
           </Button>
+          {canFs && (
+            <Button
+              variant="outline"
+              size="icon"
+              className="ml-1 h-8 w-8"
+              onClick={toggleFullscreen}
+              aria-pressed={fs}
+              aria-label={fs ? 'Leave fullscreen' : 'Fullscreen'}
+              title={fs ? 'Leave fullscreen (f)' : 'Fullscreen (f)'}
+            >
+              {fs ? <CornersIn size={13} weight="bold" /> : <CornersOut size={13} weight="bold" />}
+            </Button>
+          )}
         </div>
 
         <div className="ml-auto flex flex-wrap items-center gap-0.5">
